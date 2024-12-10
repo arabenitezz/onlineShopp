@@ -2,9 +2,10 @@
 const express = require('express');
 const router = express.Router();
 const Product = require('../models/products'); // Importamos el modelo de producto
+const verifyToken = require('../middleware/verifyToken')
 
 // Ruta principal para obtener todos los productos
-router.get('/', async (req, res) => {
+router.get('/', verifyToken, async (req, res) => {
   try {
     // Obtenemos todos los productos ordenados por nombre
     const products = await Product.find().sort({ name: 1 });
@@ -26,7 +27,7 @@ router.get('/add', (req, res) => {
 });
 
 // Ruta para insertar un nuevo producto en la base de datos
-router.post('/add', async (req, res) => {
+router.post('/add', verifyToken, async (req, res) => {
   try {
     // Creamos un nuevo producto con los datos proporcionados
     const product = new Product({
@@ -48,7 +49,7 @@ router.post('/add', async (req, res) => {
 });
 
 // Ruta para editar un producto existente
-router.put('/edit/:id', async (req, res) => {
+router.put('/edit/:id', verifyToken, async (req, res) => {
   const id = req.params.id;
   const { name, price, stock, image } = req.body;
 
@@ -77,7 +78,7 @@ router.put('/edit/:id', async (req, res) => {
 });
 
 // Ruta para eliminar un producto
-router.delete('/delete/:id', async (req, res) => {
+router.delete('/delete/:id', verifyToken, async (req, res) => {
   const id = req.params.id;
 
   try {

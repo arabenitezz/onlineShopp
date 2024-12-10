@@ -15,7 +15,7 @@ app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, 'views'));
 
 // Rutas
-app.use('/auth', adminAuthRoutes);
+app.use('/admin', adminAuthRoutes);
 app.use('/products', productRoutes)
 
 const PORT = process.env.PORT || 3000;

@@ -31,33 +31,56 @@ router.post('/register', async (req, res) => {
   }
 });
 
+// Renderizar la página de inicio de sesión
+router.get('/login', (req, res) => {
+  res.render('login', { title: 'Login' });
+});
+
 // Login de admin
 router.post('/login', async (req, res) => {
   const { username, password } = req.body;
 
   if (!username || !password) {
-    return res.status(400).json({ message: 'Todos los campos son obligatorios' });
+    return res.status(400).render('login', {
+      title: 'Login',
+      error: 'Todos los campos son obligatorios',
+    });
   }
 
   try {
     // Buscar el admin por username
     const admin = await Admin.findOne({ username });
     if (!admin) {
-      return res.status(401).json({ message: 'Credenciales inválidas' });
+      return res.status(401).render('login', {
+        title: 'Login',
+        error: 'Credenciales inválidas',
+      });
     }
 
     // Verificar la contraseña
     const isMatch = await bcrypt.compare(password, admin.password);
     if (!isMatch) {
-      return res.status(401).json({ message: 'Credenciales inválidas' });
+      return res.status(401).render('login', {
+        title: 'Login',
+        error: 'Credenciales inválidas',
+      });
     }
 
     // Generar el token JWT
     const token = jwt.sign({ id: admin._id, username: admin.username }, JWT_SECRET, { expiresIn: '1h' });
 
-    res.status(200).json({ message: 'Inicio de sesión exitoso', token });
+    // Enviar el token en el header y redirigir al dashboard
+    res.set('Authorization', `Bearer ${token}`);
+    res.render('dashboard', {
+      title: 'Dashboard',
+      username: admin.username,
+    });
   } catch (error) {
-    res.status(500).json({ message: 'Error al iniciar sesión', error });
+    console.error('Error al iniciar sesión:', error);
+    res.status(500).render('login', {
+      title: 'Login',
+      error: 'Ocurrió un error al iniciar sesión. Inténtalo de nuevo.',
+    });
   }
 });
 
