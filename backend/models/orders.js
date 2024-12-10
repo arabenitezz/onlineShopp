@@ -7,4 +7,4 @@ const orderSchema = new mongoose.Schema({
   fecha: { type: Date, default: Date.now },      // Fecha predeterminada a la actual
 });
 
-module.exports = mongoose.model('Order', orderSchema);
+module.exports = mongoose.model('orders', orderSchema);

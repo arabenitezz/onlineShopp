@@ -1,0 +1,25 @@
+doctype html
+html(lang="en")
+  head
+    meta(charset="UTF-8")
+    title= title
+  body
+    h1 Add New Product
+    form(action="/add" method="POST")
+      div
+        label(for="name") Product Name:
+        input(type="text" id="name" name="name" required)
+      
+      div
+        label(for="price") Price:
+        input(type="number" id="price" name="price" step="0.01" required)
+      
+      div
+        label(for="stock") Stock:
+        input(type="number" id="stock" name="stock" required)
+      
+      div
+        label(for="image") Image URL (optional):
+        input(type="url" id="image" name="image")
+      
+      button(type="submit") Add Product

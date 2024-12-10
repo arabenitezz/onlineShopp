@@ -5,28 +5,26 @@ const Admin = require('../models/admin');
 
 const router = express.Router();
 
-// Clave secreta para JWT (usa una variable de entorno en producción)
+
 const JWT_SECRET = 'mi_secreto_super_seguro';
 
 // Registro de un nuevo admin
 router.post('/register', async (req, res) => {
   const { username, password } = req.body;
-
   if (!username || !password) {
     return res.status(400).json({ message: 'Todos los campos son obligatorios' });
   }
+  
+  // Verificar si el username ya está registrado
+  const existingAdmin = await Admin.findOne({ username });
+  if (existingAdmin) {
+    return res.status(400).json({ message: 'El nombre de usuario ya está registrado' });
+  }
 
   try {
-    // Verificar si el username ya está registrado
-    const existingAdmin = await Admin.findOne({ username });
-    if (existingAdmin) {
-      return res.status(400).json({ message: 'El nombre de usuario ya está registrado' });
-    }
-
     // Crear un nuevo admin
     const newAdmin = new Admin({ username, password }); 
     await newAdmin.save();
-
     res.status(201).json({ message: 'Administrador registrado exitosamente' });
   } catch (error) {
     res.status(500).json({ message: 'Error al registrar administrador', error });
@@ -62,6 +60,7 @@ router.post('/login', async (req, res) => {
     res.status(500).json({ message: 'Error al iniciar sesión', error });
   }
 });
+
 
 module.exports = router;
 
