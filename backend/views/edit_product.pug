@@ -1,0 +1,26 @@
+doctype html
+html(lang="en")
+  head
+    meta(charset="UTF-8")
+    title= title
+  body
+    h1 Editar Producto
+
+    if error
+      p(style="color: red;")= error
+
+    form(action=`/products/edit/${product._id}` method="POST")
+      div
+        label(for="name") Nombre:
+        input(type="text" id="name" name="name" value=product.name required)
+      div
+        label(for="price") Precio:
+        input(type="number" id="price" name="price" value=product.price required)
+      div
+        label(for="stock") Stock:
+        input(type="number" id="stock" name="stock" value=product.stock required)
+      div
+        label(for="image") URL de la Imagen:
+        input(type="text" id="image" name="image" value=product.image)
+      div
+        button(type="submit") Guardar Cambios

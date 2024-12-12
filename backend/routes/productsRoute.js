@@ -1,25 +1,23 @@
-// Importamos las librerías necesarias
 const express = require('express');
 const router = express.Router();
-const Product = require('../models/products'); // Importamos el modelo de producto
+const Product = require('../models/products');
 const verifyToken = require('../middleware/verifyToken')
 
-// Ruta principal para obtener todos los productos
-router.get('/', verifyToken, async (req, res) => {
-  try {
-    // Obtenemos todos los productos ordenados por nombre
-    const products = await Product.find().sort({ name: 1 });
 
-    // Renderizamos la vista principal con la lista de productos
-    res.render("index", {
-      title: "Product Catalog",
-      products: products
+// Ruta principal para obtener todos los productos
+router.get('/dashboard', verifyToken, async (req, res) => {
+  try {
+    const products = await Product.find({});
+    res.render('dashboard', { 
+      title: 'Admin Dashboard', 
+      products: products 
     });
-  } catch (err) {
-    console.error('Error fetching products:', err);
-    res.status(500).json({ message: err.message });
+  } catch (error) {
+    console.error('Error fetching products:', error);
+    res.status(500).render('error', { message: 'Error loading products' });
   }
 });
+
 
 // Ruta para mostrar el formulario de agregar productos
 router.get('/add', (req, res) => {
@@ -27,29 +25,54 @@ router.get('/add', (req, res) => {
 });
 
 // Ruta para insertar un nuevo producto en la base de datos
-router.post('/add', verifyToken, async (req, res) => {
+router.post('/add', async (req, res) => {
   try {
-    // Creamos un nuevo producto con los datos proporcionados
     const product = new Product({
       name: req.body.name,
-      price: req.body.price,
-      stock: req.body.stock,
-      image: req.body.image
+      price: Number(req.body.price),
+      stock: Number(req.body.stock),
+      image: req.body.image,
     });
-
-    // Guardamos el producto en la base de datos
     await product.save();
-
-    console.log('Product added successfully');
-    res.status(201).json({ message: 'Product added successfully', product });
+    res.render('products/dashboard', { products: products, message: 'Producto agregado exitosamente' });
   } catch (error) {
     console.error('Error adding product:', error);
-    res.status(500).json({ message: 'Failed to add product', error });
+    res.status(500).send('Error al agregar producto.');
   }
 });
 
+
 // Ruta para editar un producto existente
-router.put('/edit/:id', verifyToken, async (req, res) => {
+// Ruta para renderizar el formulario de edición
+router.get('/edit/:id', async (req, res) => {
+  const id = req.params.id;
+
+  try {
+    const product = await Product.findById(id);
+
+    if (!product) {
+      return res.status(404).render('dashboard', {
+        title: 'Admin Dashboard',
+        error: 'Product not found',
+      });
+    }
+
+    // Renderiza el formulario de edición con los datos del producto
+    res.render('edit_product', {
+      title: 'Edit Product',
+      product,
+    });
+  } catch (err) {
+    console.error('Error fetching product for edit:', err);
+    res.status(500).render('dashboard', {
+      title: 'Admin Dashboard',
+      error: 'Error fetching product',
+    });
+  }
+});
+
+// Ruta para procesar la edición (POST)
+router.post('/edit/:id', async (req, res) => {
   const id = req.params.id;
   const { name, price, stock, image } = req.body;
 
@@ -57,40 +80,41 @@ router.put('/edit/:id', verifyToken, async (req, res) => {
     const product = await Product.findById(id);
 
     if (!product) {
-      req.session.message = 'Product not found';
-      return res.status(404).json({ message: 'Product not found' });
+      return res.status(404).render('dashboard', {
+        title: 'Admin Dashboard',
+        error: 'Product not found',
+      });
     }
 
-    // Actualizamos los campos del producto solo si están presentes en la solicitud
-    if (name !== undefined) product.name = name;
-    if (price !== undefined) product.price = price;
-    if (stock !== undefined) product.stock = stock;
-    if (image !== undefined) product.image = image;
+    // Actualizamos los campos del producto
+    if (name) product.name = name;
+    if (price) product.price = price;
+    if (stock) product.stock = stock;
+    if (image) product.image = image;
 
     await product.save();
 
-    res.json({ message: 'Product updated successfully', product });
+    res.redirect('/products/dashboard'); // Redirige al dashboard
   } catch (err) {
     console.error('Error updating product:', err);
-    req.session.message = 'Failed to update product';
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).render('dashboard', {
+      title: 'Admin Dashboard',
+      error: 'Error updating product',
+    });
   }
 });
+
 
 // Ruta para eliminar un producto
-router.delete('/delete/:id', verifyToken, async (req, res) => {
-  const id = req.params.id;
-
+router.post('/delete/:id', async (req, res) => {
   try {
-    await Product.findByIdAndDelete(id);
-
-    req.session.message = 'Product deleted successfully';
-    return res.status(200).json({ message: req.session.message });
+    await Product.findByIdAndDelete(req.params.id);
+    res.redirect('/products/dashboard'); // Redirige al dashboard
   } catch (error) {
     console.error('Error deleting product:', error);
-    req.session.message = 'Failed to delete product';
-    return res.status(500).json({ message: req.session.message });
+    res.redirect('/products/dashboard'); // Redirige al dashboard incluso si hay un error
   }
 });
+
 
 module.exports = router;

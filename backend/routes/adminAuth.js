@@ -32,57 +32,53 @@ router.post('/register', async (req, res) => {
 });
 
 // Renderizar la página de inicio de sesión
-router.get('/login', (req, res) => {
-  res.render('login', { title: 'Login' });
-});
+router.get('/login', (req, res) => {   
+  res.render('login', { title: 'Login' }); 
+});  
 
-// Login de admin
-router.post('/login', async (req, res) => {
-  const { username, password } = req.body;
+// Login de admin 
+router.post('/login', async (req, res) => {   
+  const { username, password } = req.body;    
 
-  if (!username || !password) {
-    return res.status(400).render('login', {
-      title: 'Login',
-      error: 'Todos los campos son obligatorios',
-    });
-  }
+  if (!username || !password) {     
+    return res.status(400).render('login', {       
+      title: 'Login',       
+      error: 'Todos los campos son obligatorios',     
+    });   
+  }    
 
-  try {
-    // Buscar el admin por username
-    const admin = await Admin.findOne({ username });
-    if (!admin) {
-      return res.status(401).render('login', {
-        title: 'Login',
-        error: 'Credenciales inválidas',
-      });
-    }
+  try {     
+    // Buscar el admin por username     
+    const admin = await Admin.findOne({ username });     
+    if (!admin) {       
+      return res.status(401).render('login', {         
+        title: 'Login',         
+        error: 'Credenciales inválidas',       
+      });     
+    }      
 
-    // Verificar la contraseña
-    const isMatch = await bcrypt.compare(password, admin.password);
-    if (!isMatch) {
-      return res.status(401).render('login', {
-        title: 'Login',
-        error: 'Credenciales inválidas',
-      });
-    }
+    // Verificar la contraseña     
+    const isMatch = await bcrypt.compare(password, admin.password);     
+    if (!isMatch) {       
+      return res.status(401).render('login', {         
+        title: 'Login',         
+        error: 'Credenciales inválidas',       
+      });     
+    }      
 
-    // Generar el token JWT
-    const token = jwt.sign({ id: admin._id, username: admin.username }, JWT_SECRET, { expiresIn: '1h' });
+    // Generar el token JWT     
+    const token = jwt.sign(
+      { id: admin._id, username: admin.username }, 
+      JWT_SECRET, 
+      { expiresIn: '1h' }
+    );      
 
-    // Enviar el token en el header y redirigir al dashboard
-    res.set('Authorization', `Bearer ${token}`);
-    res.render('dashboard', {
-      title: 'Dashboard',
-      username: admin.username,
-    });
-  } catch (error) {
-    console.error('Error al iniciar sesión:', error);
-    res.status(500).render('login', {
-      title: 'Login',
-      error: 'Ocurrió un error al iniciar sesión. Inténtalo de nuevo.',
-    });
-  }
-});
+    res.redirect(`http://localhost:3000/products/dashboard?token=${token}`) 
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Hubo un error al logear');
+}})
 
 
 module.exports = router;

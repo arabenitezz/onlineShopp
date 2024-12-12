@@ -4,6 +4,7 @@ const path = require('path');
 const adminAuthRoutes = require('./routes/adminAuth');
 const productRoutes = require('./routes/productsRoute');
 
+
 const app = express();
 
 connectDB();

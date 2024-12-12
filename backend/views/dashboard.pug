@@ -1,7 +1,86 @@
 doctype html
 html(lang="en")
   head
+    meta(charset="UTF-8")
     title= title
+    link(rel="stylesheet" href="/styles.css")
   body
-    h1 Bienvenido, #{username}
-    p Has iniciado sesión exitosamente.
+    h1 Admin Dashboard
+    p Bienvenido al panel de administración de productos.
+    
+    // Tabla para listar los productos
+    if products && products.length > 0
+      table(border="1" cellpadding="10")
+        thead
+          tr
+            th Nombre
+            th Precio
+            th Stock
+            th Imagen
+            th Acciones
+        tbody
+          each product in products
+            tr
+              td= product.name
+              td $#{product.price}
+              td= product.stock
+              td: img(src=product.image, alt=product.name, width="50")
+              td
+                a(href=`/products/edit/${product._id}`) Editar
+                form(action=`/products/delete/${product._id}` method="POST" style="display:inline;")
+                  button(type="submit") Eliminar
+    else
+      p No hay productos disponibles.
+
+    // Formulario para agregar un nuevo producto
+    h2 Agregar Producto
+    form(action="/products/add" method="POST")
+      div
+        label(for="name") Nombre:
+        input(type="text" name="name" required)
+      div
+        label(for="price") Precio:
+        input(type="number" name="price" required)
+      div
+        label(for="stock") Stock:
+        input(type="number" name="stock" required)
+      div
+        label(for="image") URL de la Imagen:
+        input(type="text" name="image")
+      div
+        button(type="submit") Agregar Producto
+
+        // Incluir el script para manejar el token y las solicitudes
+    script.
+      const token = localStorage.getItem('authToken');
+      document.querySelectorAll('form').forEach(form => {
+        form.addEventListener('submit', event => {
+          event.preventDefault(); // Evitar el comportamiento por defecto del formulario
+          
+          const action = form.action;
+          const method = form.method;
+          const formData = new FormData(form);
+          const body = JSON.stringify(Object.fromEntries(formData));
+
+          fetch(action, {
+            method: method,
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+            body: body,
+          })
+            .then(response => {
+              if (response.ok) {
+                window.location.reload(); // Recargar la página al completar
+              } else {
+                console.error('Error en la solicitud:', response);
+              }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+      });
+
+
+
+    
