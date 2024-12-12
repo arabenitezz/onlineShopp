@@ -2,35 +2,32 @@ package config
 
 import (
 	"context"
-	"log"
+	"time"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var DB *mongo.Client
+// ConnectDB crea y retorna una instancia de MongoDB Client
+func ConnectDB() (*mongo.Client, error) {
+	// URI de conexión de MongoDB
+	uri := "mongodb://localhost:27017"
 
-func ConnectDB() error {
-	// Configuración de conexión
-	clientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
-
-	// Conectar a MongoDB
-	client, err := mongo.Connect(context.TODO(), clientOptions)
+	client, err := mongo.NewClient(options.Client().ApplyURI(uri))
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	// Verificar conexión
-	err = client.Ping(context.TODO(), nil)
-	if err != nil {
-		return err
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	if err := client.Connect(ctx); err != nil {
+		return nil, err
 	}
 
-	DB = client
-	log.Println("Conexión exitosa a MongoDB")
-	return nil
-}
+	if err := client.Ping(ctx, nil); err != nil {
+		return nil, err
+	}
 
-func GetCollection(dbName, collectionName string) *mongo.Collection {
-	return DB.Database(dbName).Collection(collectionName)
+	return client, nil
 }
