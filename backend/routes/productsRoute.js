@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const Product = require('../models/products');
-const verifyToken = require('../middleware/verifyToken')
+const verifyToken = require('../middleware/verifyToken');
+
 
 
 // Ruta principal para obtener todos los productos
@@ -34,7 +35,8 @@ router.post('/add', async (req, res) => {
       image: req.body.image,
     });
     await product.save();
-    res.render('products/dashboard', { products: products, message: 'Producto agregado exitosamente' });
+    const products = await Product.find({});
+    res.render('dashboard', { products: products, message: 'Producto agregado exitosamente' });
   } catch (error) {
     console.error('Error adding product:', error);
     res.status(500).send('Error al agregar producto.');
@@ -94,7 +96,8 @@ router.post('/edit/:id', async (req, res) => {
 
     await product.save();
 
-    res.redirect('/products/dashboard'); // Redirige al dashboard
+    const products = await Product.find({});
+    res.render('dashboard', { products: products, message: 'Producto editado exitosamente' });
   } catch (err) {
     console.error('Error updating product:', err);
     res.status(500).render('dashboard', {
@@ -109,10 +112,11 @@ router.post('/edit/:id', async (req, res) => {
 router.post('/delete/:id', async (req, res) => {
   try {
     await Product.findByIdAndDelete(req.params.id);
-    res.redirect('/products/dashboard'); // Redirige al dashboard
+    const products = await Product.find({});
+    res.render('dashboard', { products: products, message: 'Producto editado exitosamente' });
   } catch (error) {
     console.error('Error deleting product:', error);
-    res.redirect('/products/dashboard'); // Redirige al dashboard incluso si hay un error
+    res.render('dashboard', { products: products, message: 'Producto editado exitosamente' });
   }
 });
 
