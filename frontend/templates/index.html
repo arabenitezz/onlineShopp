@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tienda Online</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>Tienda Online</h1>
+    <form method="POST" action="/">
+        <div>
+            {{range .}}
+            <div class="product">
+                <h3>{{.Name}}</h3>
+                <p>Precio: ${{.Price}}</p>
+                <p>Stock: {{.Stock}}</p>
+                <label>
+                    Cantidad: <input type="number" name="quantity_{{.ID}}" min="0" max="{{.Stock}}" value="0">
+                </label>
+            </div>
+            {{end}}
+        </div>
+        <h2>Detalles del Pedido</h2>
+        <label>
+            Nombre: <input type="text" name="name" required>
+        </label>
+        <br>
+        <label>
+            Dirección: <input type="text" name="address" required>
+        </label>
+        <br>
+        <button type="submit">Realizar Pedido</button>
+    </form>
+</body>
+</html>

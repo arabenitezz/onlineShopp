@@ -3,6 +3,7 @@ const connectDB = require('./config/db');
 const path = require('path');
 const adminAuthRoutes = require('./routes/adminAuth');
 const productRoutes = require('./routes/productsRoute');
+const ordersRoutes = require('./routes/ordersRoute');
 
 
 const app = express();
@@ -17,7 +18,8 @@ app.set('views', path.join(__dirname, 'views'));
 
 // Rutas
 app.use('/admin', adminAuthRoutes);
-app.use('/products', productRoutes)
+app.use('/products', productRoutes);
+app.use('/orders', ordersRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

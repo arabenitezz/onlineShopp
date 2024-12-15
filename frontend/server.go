@@ -22,18 +22,9 @@ func main() {
 	// Crear router con Gorilla Mux
 	r := mux.NewRouter()
 
-	// Configurar servidor
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("¡Servidor funcionando y conectado a MongoDB!"))
-	})
-
-	http.HandleFunc("/hello", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Hola, mundo!"))
-	})
-
-	// Ruta para obtener los productos
-	r.HandleFunc("/products", routes.GetProducts).Methods("GET")
+	// Ruta índice que maneja productos y pedidos
+	r.HandleFunc("/", routes.IndexPage).Methods("GET", "POST")
 
 	log.Println("Servidor corriendo en http://localhost:8080")
-	http.ListenAndServe(":8080", nil)
+	http.ListenAndServe(":8080", r)
 }
