@@ -1,30 +1,22 @@
 block content
-  h1 Manage Orders
-  
-  table.table
-    thead
-      tr
-        th Order ID
-        th Name
-        th Address
-        th Quantity
-        th Actions
-    tbody
-      each order in orders
-        tr
-          td= order._id
-          td= order.name
-          td= order.address
-          td= order.quantity
-          td
-            form(action=`/orders/update-status/${order._id}` method='POST')
-              select(name='status')
-                option(value='Pending') Pending
-                option(value='Processing') Processing
-                option(value='Shipped') Shipped
-                option(value='Delivered') Delivered
-              button.btn.btn-primary(type='submit') Update Status
-            
-            form(action=`/orders/delete/${order._id}` method='POST')
-              button.btn.btn-danger(type='submit') Delete
+    h1 Manage Orders
+    table.table
+        thead
+            tr
+                th Order ID
+                th Name
+                th Address
+                th Quantity
+                th Actions
+        tbody
+            each order in orders
+                tr
+                    td= order._id 
+                    td= order.name
+                    td= order.address
+                    td= order.quantity
+                    td
+                        form(action=`/orders/delete/${order._id}` method='POST')
+                            button.btn.btn-danger(type='submit') Shipped
+
 

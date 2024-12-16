@@ -25,6 +25,11 @@ func main() {
 	// Ruta índice que maneja productos y pedidos
 	r.HandleFunc("/", routes.IndexPage).Methods("GET", "POST")
 
+	// Añadir un manejador de archivos estáticos
+	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
+
 	log.Println("Servidor corriendo en http://localhost:8080")
-	http.ListenAndServe(":8080", r)
+
+	// Usar http.ListenAndServe con el handler de Mux
+	log.Fatal(http.ListenAndServe(":8080", r))
 }

@@ -2,97 +2,105 @@ package routes
 
 import (
 	"context"
+	"fmt"
 	"html/template"
 	"net/http"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type Product struct {
-	ID    primitive.ObjectID `bson:"_id"`
-	Name  string             `bson:"name"`
-	Price float64            `bson:"price"`
-	Stock int                `bson:"stock"`
+	ID    string  `bson:"_id"`
+	Name  string  `bson:"name"`
+	Price float64 `bson:"price"`
+	Stock int     `bson:"stock"`
 }
 
 var db *mongo.Database
 
-// SetDatabase permite configurar la base de datos a usar
 func SetDatabase(database *mongo.Database) {
 	db = database
 }
 
-// IndexPage maneja la página principal
 func IndexPage(w http.ResponseWriter, r *http.Request) {
-	switch r.Method {
-	case http.MethodGet:
-		// Obtener productos de la base de datos
-		collection := db.Collection("products")
-		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-		defer cancel()
-
-		cursor, err := collection.Find(ctx, bson.M{})
-		if err != nil {
-			http.Error(w, "Error al obtener productos", http.StatusInternalServerError)
+	if r.Method == http.MethodPost {
+		if err := processOrder(r); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		defer cursor.Close(ctx)
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
 
-		var products []Product
-		if err := cursor.All(ctx, &products); err != nil {
-			http.Error(w, "Error procesando los datos", http.StatusInternalServerError)
-			return
-		}
+	products, err := fetchProducts()
+	if err != nil {
+		http.Error(w, "Error fetching products", http.StatusInternalServerError)
+		return
+	}
 
-		// Renderizar plantilla con productos
-		tmpl, err := template.ParseFiles("templates/index.html")
-		if err != nil {
-			http.Error(w, "Error cargando plantilla", http.StatusInternalServerError)
-			return
-		}
+	tmpl, err := template.ParseFiles("templates/index.html")
+	if err != nil {
+		http.Error(w, "Error loading template", http.StatusInternalServerError)
+		return
+	}
 
-		w.Header().Set("Content-Type", "text/html")
-		tmpl.Execute(w, products)
+	tmpl.Execute(w, products)
+}
 
-	case http.MethodPost:
-		// Manejar pedido
-		r.ParseForm()
-		name := r.FormValue("name")
-		address := r.FormValue("address")
+func fetchProducts() ([]Product, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 
-		if name == "" || address == "" {
-			http.Error(w, "Nombre y dirección son obligatorios", http.StatusBadRequest)
-			return
-		}
+	cursor, err := db.Collection("products").Find(ctx, bson.M{})
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
 
-		var orderItems []bson.M
-		for key, values := range r.Form {
-			if len(values) > 0 && key != "name" && key != "address" {
-				quantity := values[0]
+	var products []Product
+	err = cursor.All(ctx, &products)
+	return products, err
+}
+
+func processOrder(r *http.Request) error {
+	r.ParseForm()
+
+	// Validate basic order information
+	if r.FormValue("name") == "" || r.FormValue("address") == "" {
+		return errorf("Name and address are required")
+	}
+
+	// Prepare order items
+	var orderItems []bson.M
+	for key, values := range r.Form {
+		if len(values) > 0 && len(key) > 9 && key[:9] == "quantity_" {
+			quantity := values[0]
+			if quantity != "0" {
+				productID := key[9:]
 				orderItems = append(orderItems, bson.M{
-					"product":  key,
-					"quantity": quantity,
+					"product_id": productID,
+					"quantity":   quantity,
 				})
 			}
 		}
-
-		// Guardar pedido
-		collection := db.Collection("orders")
-		_, err := collection.InsertOne(context.TODO(), bson.M{
-			"name":    name,
-			"address": address,
-			"items":   orderItems,
-		})
-		if err != nil {
-			http.Error(w, "Error al guardar pedido", http.StatusInternalServerError)
-			return
-		}
-
-		http.Redirect(w, r, "/", http.StatusSeeOther)
-	default:
-		http.Error(w, "Método no permitido", http.StatusMethodNotAllowed)
 	}
+
+	if len(orderItems) == 0 {
+		return errorf("No products selected")
+	}
+
+	// Insert order
+	_, err := db.Collection("orders").InsertOne(context.TODO(), bson.M{
+		"name":    r.FormValue("name"),
+		"address": r.FormValue("address"),
+		"items":   orderItems,
+		"date":    time.Now(),
+	})
+	return err
+}
+
+func errorf(format string, a ...interface{}) error {
+	return fmt.Errorf(format, a...)
 }
