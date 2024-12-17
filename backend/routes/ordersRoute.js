@@ -8,6 +8,7 @@ const Order = require('../models/orders');
 router.get('/', async (req, res) => {
     try {
         const orders = await Order.find({}).sort({ createdAt: -1 });
+
         res.render('orders_view', { 
             title: "Manage Orders", 
             orders: orders 
@@ -21,27 +22,70 @@ router.get('/', async (req, res) => {
     }
 });
 
-// Route to delete an order
-router.post('/delete/:id', async (req, res) => {
+
+// Route to manually update the order status
+router.get('/edit-status/:id', async (req, res) => {
     try {
         const orderId = req.params.id;
-
+        
+        // Validate the order ID
         if (!mongoose.Types.ObjectId.isValid(orderId)) {
             return res.status(400).send('Invalid order ID');
         }
-
-        const deletedOrder = await Order.findByIdAndDelete(orderId);
-
-        if (!deletedOrder) {
+        
+        // Find the order
+        const order = await Order.findById(orderId);
+        
+        if (!order) {
             return res.status(404).send('Order not found');
         }
-
-        res.redirect('/orders');
+        
+        // Render a page to edit the order status
+        res.render('editar_estado', { order });
     } catch (error) {
-        console.error('Error deleting order:', error);
-        res.status(500).send('Error deleting order');
+        console.error('Error loading order status edit page:', error);
+        res.status(500).send('Error loading order status edit page');
     }
 });
+
+// Route to save the updated order status
+router.post('/update-status/:id', async (req, res) => {
+    try {
+        const orderId = req.params.id;
+        const { status } = req.body;
+        
+        // Validate the order ID
+        if (!mongoose.Types.ObjectId.isValid(orderId)) {
+            return res.status(400).send('Invalid order ID');
+        }
+        
+        // Validate status
+        const validStatuses = ['en proceso', 'enviado', 'cancelado', 'entregado'];
+        if (!validStatuses.includes(status)) {
+            return res.status(400).send('Invalid status');
+        }
+        
+        // Update the order
+        const updatedOrder = await Order.findByIdAndUpdate(
+            orderId, 
+            { status }, 
+            { new: true }
+        );
+        
+        if (!updatedOrder) {
+            return res.status(404).send('Order not found');
+        }
+        
+        // Redirect back to the orders management page
+        res.redirect('/orders');
+    } catch (error) {
+        console.error('Error updating order status:', error);
+        res.status(500).send('Error updating order status');
+    }
+});
+
+
+
 
 module.exports = router;
 

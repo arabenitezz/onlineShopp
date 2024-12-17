@@ -1,0 +1,12 @@
+block content
+    h1 Editar Estado de Orden
+    form(action=`/orders/update-status/${order._id}` method='POST')
+        .form-group
+            label(for='status') Estado de la Orden
+            select.form-control(name='status' id='status')
+                option(value='en proceso' selected=order.status === 'en proceso') En Proceso
+                option(value='enviado' selected=order.status === 'enviado') Enviado
+                option(value='cancelado' selected=order.status === 'cancelado') Cancelado
+                option(value='entregado' selected=order.status === 'entregado') Entregado
+        button.btn.btn-primary(type='submit') Guardar Cambios
+        a.btn.btn-secondary(href='/orders') Cancelar

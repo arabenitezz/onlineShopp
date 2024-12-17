@@ -96,6 +96,7 @@ func processOrder(r *http.Request) error {
 	_, err := db.Collection("orders").InsertOne(context.TODO(), bson.M{
 		"name":    r.FormValue("name"),
 		"address": r.FormValue("address"),
+		"status":  "en proceso",
 		"items":   orderItems,
 		"date":    time.Now(),
 	})

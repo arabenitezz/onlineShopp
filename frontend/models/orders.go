@@ -5,4 +5,5 @@ type Order struct {
 	Name     string `json:"name" form:"name"`
 	Address  string `json:"address" form:"address"`
 	Quantity int    `json:"quantity" form:"quantity"`
+	Status   string `json:"status" form:"status"`
 }

@@ -7,16 +7,19 @@ block content
                 th Name
                 th Address
                 th Quantity
+                th Status
                 th Actions
         tbody
             each order in orders
                 tr
-                    td= order._id 
+                    td= order._id
                     td= order.name
                     td= order.address
                     td= order.quantity
                     td
-                        form(action=`/orders/delete/${order._id}` method='POST')
-                            button.btn.btn-danger(type='submit') Shipped
+                        span.badge(class=order.status === 'en proceso' ? 'badge-warning' : 'badge-success')= order.status
+                    td
+                        a.btn.btn-primary(href=`/orders/edit-status/${order._id}`) Editar Estado
+
 
 
