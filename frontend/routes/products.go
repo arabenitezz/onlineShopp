@@ -16,6 +16,7 @@ type Product struct {
 	Name  string  `bson:"name"`
 	Price float64 `bson:"price"`
 	Stock int     `bson:"stock"`
+	Image string  `bson:"image"`
 }
 
 var db *mongo.Database

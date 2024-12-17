@@ -24,7 +24,7 @@ html(lang="en")
               td= product.name
               td $#{product.price}
               td= product.stock
-              td: img(src=product.image, alt=product.name, width="50")
+              td: img
               td
                 a(href=`/products/edit/${product._id}`) Editar
                 form(action=`/products/delete/${product._id}` method="POST" style="display:inline;")
@@ -52,6 +52,9 @@ html(lang="en")
 
     // Boton para ir a ordenes
     a(href="/orders") Ver Pedidos
+
+
+    
 
         // Incluir el script para manejar el token y las solicitudes
     script.
