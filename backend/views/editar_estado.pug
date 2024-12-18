@@ -4,9 +4,9 @@ block content
         .form-group
             label(for='status') Estado de la Orden
             select.form-control(name='status' id='status')
-                option(value='en proceso' selected=order.status === 'en proceso') En Proceso
-                option(value='enviado' selected=order.status === 'enviado') Enviado
-                option(value='cancelado' selected=order.status === 'cancelado') Cancelado
-                option(value='entregado' selected=order.status === 'entregado') Entregado
+                option(value='En proceso' selected=order.status === 'En proceso') En Proceso
+                option(value='Enviado' selected=order.status === 'Enviado') Enviado
+                option(value='Cancelado' selected=order.status === 'Cancelado') Cancelado
+                option(value='Entregado' selected=order.status === 'Entregado') Entregado
         button.btn.btn-primary(type='submit') Guardar Cambios
         a.btn.btn-secondary(href='/orders') Cancelar

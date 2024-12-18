@@ -24,7 +24,7 @@ html(lang="en")
               td= product.name
               td $#{product.price}
               td= product.stock
-              td: img
+              td: img(src=product.image, alt=product.name, width="50")
               td
                 a(href=`/products/edit/${product._id}`) Editar
                 form(action=`/products/delete/${product._id}` method="POST" style="display:inline;")
@@ -52,41 +52,4 @@ html(lang="en")
 
     // Boton para ir a ordenes
     a(href="/orders") Ver Pedidos
-
-
-    
-
-        // Incluir el script para manejar el token y las solicitudes
-    script.
-      const token = localStorage.getItem('authToken');
-      document.querySelectorAll('form').forEach(form => {
-        form.addEventListener('submit', event => {
-          event.preventDefault(); // Evitar el comportamiento por defecto del formulario
-          
-          const action = form.action;
-          const method = form.method;
-          const formData = new FormData(form);
-          const body = JSON.stringify(Object.fromEntries(formData));
-
-          fetch(action, {
-            method: method,
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json',
-            },
-            body: body,
-          })
-            .then(response => {
-              if (response.ok) {
-                window.location.reload(); // Recargar la página al completar
-              } else {
-                console.error('Error en la solicitud:', response);
-              }
-            })
-            .catch(error => console.error('Error:', error));
-        });
-      });
-
-
-
     

@@ -16,6 +16,7 @@
                 <h3>{{.Name}}</h3>
                 <p>Precio: ${{.Price}}</p>
                 <p>Stock: {{.Stock}}</p>
+                <img src="{{.Image}}" alt="{{.Name}}" width="100">
                 <label>
                     Cantidad: <input type="number" name="quantity_{{.ID}}" min="0" max="{{.Stock}}" value="0">
                 </label>

@@ -59,12 +59,6 @@ router.post('/update-status/:id', async (req, res) => {
             return res.status(400).send('Invalid order ID');
         }
         
-        // Validate status
-        const validStatuses = ['en proceso', 'enviado', 'cancelado', 'entregado'];
-        if (!validStatuses.includes(status)) {
-            return res.status(400).send('Invalid status');
-        }
-        
         // Update the order
         const updatedOrder = await Order.findByIdAndUpdate(
             orderId, 
@@ -85,8 +79,4 @@ router.post('/update-status/:id', async (req, res) => {
 });
 
 
-
-
 module.exports = router;
-
-  
